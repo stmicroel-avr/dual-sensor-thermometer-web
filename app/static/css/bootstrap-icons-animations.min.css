@@ -1,0 +1,1 @@
+.bi.spin{display:inline-block;will-change:transform}.spin{animation:1s linear infinite spin}@keyframes spin{from{transform:rotate(360deg)}to{transform:rotate(0)}}
