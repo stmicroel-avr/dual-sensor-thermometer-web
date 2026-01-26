@@ -3,10 +3,9 @@ from bleak import BleakScanner, BleakClient
 from datetime import datetime
 
 from fastapi import FastAPI
-from watchfiles import awatch
 
 
-async def ble_scan():
+async def ble_scan(app: FastAPI):
     """
     Scan all available bluetooth devices
     :return: list
@@ -20,6 +19,7 @@ async def ble_scan():
             'time': datetime.now().strftime('%Y-%m-%d %H:%M'),
         })
     result_list.sort(key=lambda x: (x['name'] is None, x['name'] or ''))
+    app.state.logger.info(f"Found {len(result_list)} devices")
 
     return result_list
 
@@ -35,7 +35,7 @@ async def ble_connect_worker(app: FastAPI, address: str):
 
     client = BleakClient(address)
     await client.connect()
-    print("Connected")
+    app.state.logger.info(f"Connected to {address}")
 
     await client.start_notify("0000ffe1-0000-1000-8000-00805f9b34fb", on_rx)
     while True:

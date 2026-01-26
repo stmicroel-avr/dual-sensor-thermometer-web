@@ -93,3 +93,6 @@ const bluetoothFunc = {
 }
 
 bluetoothFunc.scan();
+
+(new WebSocket("/ws"))
+    .addEventListener('message', (e) => console.log(e));

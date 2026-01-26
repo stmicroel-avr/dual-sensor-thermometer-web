@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from fastapi import FastAPI
 from fastapi.requests import Request
 from fastapi.staticfiles import StaticFiles
@@ -17,8 +18,11 @@ async def lifespan(app: FastAPI):
     app.state.ble_client = None
     app.state.ws_clients = set()
     app.state.queue = asyncio.Queue(maxsize=5000)
+    app.state.logger = logging.getLogger("uvicorn.error")
     app.state.queue_task = asyncio.create_task(queue_handler(app))
+    app.state.logger.info("App state initialized")
     yield
+    app.state.logger.info("App stopping")
     app.state.queue_task.cancel()
     if app.state.ble_task is not None:
         app.state.ble_task.cancel()

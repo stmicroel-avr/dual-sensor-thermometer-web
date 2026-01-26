@@ -2,6 +2,7 @@ import asyncio
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse,JSONResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.websockets import WebSocket, WebSocketDisconnect
 
 from bluetooth import ble_scan, ble_connect_worker
 
@@ -27,7 +28,7 @@ async def scan(request: Request):
     :param request: Request
     :return: JSONResponse
     """
-    data = await ble_scan()
+    data = await ble_scan(request.app)
     return {"data": data}
 
 @router.post("/connect", response_class=JSONResponse)
@@ -48,6 +49,20 @@ async def connect(request: Request):
 
     return {"success": True}
 
-# @router.websocket("/ws")
-# async def websocket_endpoint(websocket: WebSocket):
-#     await ws.accept()
+@router.websocket("/ws")
+async def websocket_endpoint(ws: WebSocket):
+    """
+    Websocket endpoint
+    :param ws: WebSocket
+    :return:
+    """
+    await ws.accept()
+    ws.app.state.logger.info("Websocket client connected")
+    ws.app.state.ws_clients.add(ws)
+    
+    try:
+        while True:
+            await ws.receive_text()
+    except WebSocketDisconnect:
+        ws.app.state.logger.info("Websocket client disconnected")
+        ws.app.state.ws_clients.remove(ws)

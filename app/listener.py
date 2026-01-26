@@ -1,6 +1,5 @@
-import asyncio
-import logging
 from fastapi import FastAPI
+from websocket import broadcast
 
 async def queue_handler(app: FastAPI):
     """
@@ -8,10 +7,12 @@ async def queue_handler(app: FastAPI):
     :param app: Application instance
     :return: coroutine
     """
-
-    logger = logging.getLogger("uvicorn.error")
-    logger.info("Queuing events started")
+    app.state.logger.info("Queuing events started")
     while True:
-        message = await app.state.queue.get()
-        logger.warning(f'New queue event: {message}')
-        await asyncio.sleep(0.1)
+        try:
+            message = await app.state.queue.get()
+            app.state.logger.warning(f'New queue event: {message}')
+            await broadcast(app, message)
+        except Exception:
+            app.state.logger.exception("Queue handler crashed")
+
