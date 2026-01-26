@@ -1,4 +1,10 @@
-from bleak import BleakScanner
+import asyncio
+from bleak import BleakScanner, BleakClient
+from datetime import datetime
+
+from fastapi import FastAPI
+from watchfiles import awatch
+
 
 async def ble_scan():
     """
@@ -6,12 +12,31 @@ async def ble_scan():
     :return: list
     """
     result_list = []
-    devices = await BleakScanner.discover()
+    devices = await BleakScanner.discover(10)
     for device in devices:
         result_list.append({
             'addr': device.address,
             'name': device.name,
+            'time': datetime.now().strftime('%Y-%m-%d %H:%M'),
         })
+    result_list.sort(key=lambda x: (x['name'] is None, x['name'] or ''))
+
     return result_list
 
+async def ble_connect_worker(app: FastAPI, address: str):
+    """
+    Bluetooth connection and handle new incoming data
+    :param app: FastAPI
+    :param address: Device address
+    :return:
+    """
+    def on_rx(_, data: bytearray):
+        app.state.queue.put_nowait(data.decode(errors="ignore"))
 
+    client = BleakClient(address)
+    await client.connect()
+    print("Connected")
+
+    await client.start_notify("0000ffe1-0000-1000-8000-00805f9b34fb", on_rx)
+    while True:
+        await asyncio.sleep(0.1)
