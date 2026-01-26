@@ -12,7 +12,9 @@ async def queue_handler(app: FastAPI):
         try:
             message = await app.state.queue.get()
             app.state.logger.warning(f'New queue event: {message}')
-            await broadcast(app, message)
+            await broadcast(app, {
+                k: float(v) for k, v in (pair.split(":") for pair in message.strip(";").split(";") if pair)
+            })
         except Exception:
             app.state.logger.exception("Queue handler crashed")
 

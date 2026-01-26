@@ -3,13 +3,16 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Dual Thermometer Web 1.0</title>
-    <script src="static/js/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-streaming@2"></script>
     <link rel="stylesheet" href="static/css/base.css">
     <link rel="stylesheet" href="static/css/bootstrap.min.css">
     <link rel="stylesheet" href="static/css/bootstrap-icons.min.css">
     <link rel="stylesheet" href="static/css/bootstrap-icons-animations.min.css">
     <script src="static/js/bootstrap.min.js"></script>
-    <script src="static/js/index.js?ver=1.7" defer></script>
+    <script src="static/js/index.js?ver=1.12" defer></script>
 </head>
 <body>
 <!--Navbar-->
@@ -29,7 +32,7 @@
 </nav>
 
 <!--App body-->
-<div class="container p-3">
+<div class="container p-1">
     <div class="row">
         <!--Chart column -->
         <div class="col-8">

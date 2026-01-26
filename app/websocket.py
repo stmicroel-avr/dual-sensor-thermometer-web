@@ -1,7 +1,9 @@
+import json
 from fastapi import FastAPI
+import uvicorn
 
 
-async def broadcast(app: FastAPI, message: str) -> None:
+async def broadcast(app: FastAPI, message: dict) -> None:
     """
     Broadcast message to all connected clients
     :param app: App instance
@@ -10,6 +12,6 @@ async def broadcast(app: FastAPI, message: str) -> None:
     """
     for ws in list(app.state.ws_clients):
         try:
-            await ws.send_text(message)
+            await ws.send_text(json.dumps(message))
         except:
             app.state.ws_clients.remove(ws)

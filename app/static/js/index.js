@@ -1,19 +1,41 @@
-const ctx = document.getElementById('myChart');
-
-new Chart(ctx, {
-    type: 'bar',
+const myChart = new Chart(document.getElementById('myChart'), {
+    type: 'line',
     data: {
-        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-        datasets: [{
-            label: '# of Votes',
-            data: [12, 19, 3, 5, 2, 3],
-            borderWidth: 1
-        }]
+        datasets: [
+            {
+                label: 'Temp1',
+                data: [],
+                borderWidth: 2,
+                pointRadius: 2,
+                tension: 0.3,
+                borderColor: '#36A2EB',
+                backgroundColor: 'rgba(54,162,235,0.15)',
+            },
+            {
+                label: 'Temp2',
+                data: [],
+                borderWidth: 2,
+                pointRadius: 2,
+                tension: 0.3,
+                borderColor: '#FF6384',
+                backgroundColor: 'rgba(255,99,132,0.15)',
+            }
+        ]
     },
     options: {
+        animation: false,
+        parsing: false,
+
         scales: {
+            x: {
+                type: 'realtime',
+                realtime: {
+                    duration: 300_000,
+                    delay: 500
+                }
+            },
             y: {
-                beginAtZero: true
+                title: {display: true, text: '°C'}
             }
         }
     }
@@ -95,4 +117,16 @@ const bluetoothFunc = {
 bluetoothFunc.scan();
 
 (new WebSocket("/ws"))
-    .addEventListener('message', (e) => console.log(e));
+    .addEventListener('message', (e) => {
+        const data = JSON.parse(e.data);
+        const ts = Date.now();
+        console.log({
+            ts: ts,
+            t1: data.Temp1,
+            t2: data.Temp2,
+        })
+
+        myChart.data.datasets[0].data.push({x: ts, y: data.Temp1});
+        myChart.data.datasets[1].data.push({x: ts, y: data.Temp2});
+        myChart.update('quiet');
+    });
