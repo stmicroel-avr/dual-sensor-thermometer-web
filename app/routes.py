@@ -1,10 +1,9 @@
-import asyncio
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse,JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.websockets import WebSocket, WebSocketDisconnect
 
-from bluetooth import ble_scan, ble_connect_worker
+from bluetooth import *
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -46,8 +45,26 @@ async def connect(request: Request):
         return {"success": True, "detail": "already connected"}
 
     request.app.state.ble_task = asyncio.create_task(ble_connect_worker(request.app, data['addr']))
+    request.app.state.ble_device = Device(
+        address=data['addr'],
+        name=data['name'],
+        time=data['time'],
+    )
 
     return {"success": True}
+
+@router.get("/current_bluetooth_connection", response_class=JSONResponse)
+async def get_current_ble_connect(request: Request):
+    if request.app.state.ble_task and not request.app.state.ble_task.done():
+        return {
+            "success": True,
+            "data": {
+                "name": request.app.state.ble_device.name,
+                "addr": request.app.state.ble_device.address,
+                "time": request.app.state.ble_device.time,
+            },
+        }
+    return {"success": False}
 
 @router.websocket("/ws")
 async def websocket_endpoint(ws: WebSocket):

@@ -4,6 +4,8 @@
 #
 #    pip-compile
 #
+aiosqlite==0.22.1
+    # via -r requirements.in
 annotated-doc==0.0.4
     # via fastapi
 annotated-types==0.7.0

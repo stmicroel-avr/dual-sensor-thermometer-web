@@ -1,9 +1,17 @@
 import asyncio
+from dataclasses import dataclass
 from bleak import BleakScanner, BleakClient
 from datetime import datetime
-
 from fastapi import FastAPI
 
+@dataclass
+class Device:
+    """
+    Connected device
+    """
+    name: str|None
+    address: str|None
+    time: str|None
 
 async def ble_scan(app: FastAPI):
     """
