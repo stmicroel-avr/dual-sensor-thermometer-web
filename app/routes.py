@@ -6,7 +6,7 @@ from fastapi.websockets import WebSocket, WebSocketDisconnect
 from bluetooth import *
 
 router = APIRouter()
-templates = Jinja2Templates(directory="app/templates")
+templates = Jinja2Templates(directory="templates")
 
 @router.get("/", response_class=HTMLResponse)
 async def index(request: Request):
