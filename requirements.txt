@@ -17,8 +17,13 @@ anyio==4.12.1
 bleak==2.1.1
     # via -r requirements.in
 click==8.3.1
-    # via uvicorn
+    # via
+    #   rich-toolkit
+    #   typer
+    #   uvicorn
 fastapi==0.128.0
+    # via -r requirements.in
+fastapi-cli==0.0.20
     # via -r requirements.in
 h11==0.16.0
     # via uvicorn
@@ -26,10 +31,20 @@ httptools==0.7.1
     # via uvicorn
 idna==3.11
     # via anyio
+jinja2==3.1.6
+    # via -r requirements.in
+markdown-it-py==4.0.0
+    # via rich
+markupsafe==3.0.3
+    # via jinja2
+mdurl==0.1.2
+    # via markdown-it-py
 pydantic==2.12.5
     # via fastapi
 pydantic-core==2.41.5
     # via pydantic
+pygments==2.19.2
+    # via rich
 pyobjc-core==12.1
     # via
     #   bleak
@@ -50,20 +65,34 @@ python-dotenv==1.2.1
     # via uvicorn
 pyyaml==6.0.3
     # via uvicorn
+rich==14.3.2
+    # via
+    #   rich-toolkit
+    #   typer
+rich-toolkit==0.18.1
+    # via fastapi-cli
+shellingham==1.5.4
+    # via typer
 starlette==0.50.0
     # via fastapi
+typer==0.21.1
+    # via fastapi-cli
 typing-extensions==4.15.0
     # via
     #   anyio
     #   fastapi
     #   pydantic
     #   pydantic-core
+    #   rich-toolkit
     #   starlette
+    #   typer
     #   typing-inspection
 typing-inspection==0.4.2
     # via pydantic
 uvicorn[standard]==0.40.0
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   fastapi-cli
 uvloop==0.22.1
     # via uvicorn
 watchfiles==1.1.1
