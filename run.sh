@@ -9,4 +9,4 @@ sudo docker run -d --name web --network host \
 -v /mnt/data/dual-sensors-therm/db:/usr/src/app/db \
 -e DBUS_SYSTEM_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket \
 --cap-add=NET_ADMIN --cap-add=NET_RAW \
-web
+dual-sensor-therm-web
