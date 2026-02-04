@@ -26,3 +26,8 @@ dist/
 
 # Logs
 *.log
+
+# SQLite files
+db/app.db
+db/app.db-shm
+db/app.db-wal

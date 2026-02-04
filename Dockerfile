@@ -7,6 +7,6 @@ COPY requirements-linux.txt ./
 RUN pip install -r requirements-linux.txt
 
 COPY app .
-COPY app.db .
+RUN mkdir "db"
 
 ENTRYPOINT ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
