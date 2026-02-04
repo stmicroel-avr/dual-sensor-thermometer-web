@@ -18,7 +18,7 @@ async def lifespan(app: FastAPI):
     :param app: App
     :return: None
     """
-    app.state.db = await aiosqlite.connect("app.db")
+    app.state.db = await aiosqlite.connect("db/app.db")
     await app.state.db.execute("PRAGMA journal_mode=WAL;")
     await create_db(app)
     app.state.ble_task = None

@@ -28,6 +28,7 @@ dist/
 *.log
 
 # SQLite files
+app/db
 db/app.db
 db/app.db-shm
 db/app.db-wal
