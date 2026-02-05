@@ -33,4 +33,5 @@ db/app.db
 db/app.db-shm
 db/app.db-wal
 
+# ignore
 .DS_store
