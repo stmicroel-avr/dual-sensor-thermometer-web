@@ -4,7 +4,7 @@ LABEL authors="stmicroel"
 WORKDIR /usr/src/app
 
 COPY requirements-linux.txt ./
-RUN pip install -r requirements-linux.txt
+RUN pip install --no-cache-dir -r requirements-linux.txt
 
 COPY app .
 
