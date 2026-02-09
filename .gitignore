@@ -29,6 +29,7 @@ dist/
 
 # SQLite files
 app/db
+app/data
 db/app.db
 db/app.db-shm
 db/app.db-wal

@@ -1,6 +1,6 @@
 import asyncio
 import logging
-import aiosqlite
+import asyncpg
 from fastapi import FastAPI
 from fastapi.requests import Request
 from contextlib import asynccontextmanager
@@ -18,8 +18,14 @@ async def lifespan(app: FastAPI):
     :param app: App
     :return: None
     """
-    app.state.db = await aiosqlite.connect("db/app.db")
-    await app.state.db.execute("PRAGMA journal_mode=WAL;")
+    app.state.db_pool = await asyncpg.create_pool(
+        user="app",
+        password="63gS2&f|3umA",
+        database="app",
+        host="127.0.0.1",
+        port=5432,
+        min_size=1
+    )
     await create_db(app)
     app.state.ble_task = None
     app.state.ble_client = None
@@ -37,7 +43,7 @@ async def lifespan(app: FastAPI):
     app.state.logger.info("App state initialized")
     yield
     app.state.logger.info("App stopping")
-    await app.state.db.close()
+    await app.state.db_pool.close()
     app.state.queue_task.cancel()
     if app.state.ble_task is not None:
         app.state.ble_task.cancel()

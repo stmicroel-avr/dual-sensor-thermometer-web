@@ -1,5 +1,4 @@
-import time
-
+import datetime as dt
 from fastapi import FastAPI
 from websocket import broadcast
 
@@ -23,14 +22,18 @@ async def queue_handler(app: FastAPI):
         except Exception:
             app.state.logger.exception("Queue handler crashed")
 
-async def write_events(app: FastAPI, metrics: dict):
+async def write_events(app: FastAPI, metrics: dict) -> None:
     """
-    Write metrics to database
-    :param app: Application instance
-    :param metrics: Metrics dictionary
-    :return:
+    Write metrics to PostgreSQL (asyncpg)
     """
-    t = int(time.time())
-    for k, v in metrics.items():
-        await app.state.db.execute('INSERT INTO metrics(sensor_id, value, created_at) VALUES (?, ?, ?)', (k, v, t))
-    await app.state.db.commit()
+    # Если хочешь "как было" — время одно на все записи
+    ts = dt.datetime.now()  # TIMESTAMP (без TZ)
+
+    async with app.state.db_pool.acquire() as conn:
+        for sensor_id, value in metrics.items():
+            await conn.execute(
+                "INSERT INTO metrics(sensor_id, value, created_at) VALUES($1, $2, $3)",
+                sensor_id,
+                float(value) if value is not None else None,
+                ts,
+            )
