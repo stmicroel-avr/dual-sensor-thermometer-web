@@ -27,7 +27,7 @@ dist/
 # Logs
 *.log
 
-# SQLite files
+# Database files
 app/db
 app/data
 db/app.db
@@ -36,3 +36,6 @@ db/app.db-wal
 
 # ignore
 .DS_store
+
+# Test files
+app/scratch.py
