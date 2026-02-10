@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from fastapi import FastAPI
 
 async def create_db(app: FastAPI) -> None:
@@ -48,3 +49,25 @@ async def create_db(app: FastAPI) -> None:
         CREATE INDEX IF NOT EXISTS idx_hour_metrics
         ON hour_metrics (created_at, sensor_id);
         """)
+
+async def fetch_last_metrics(app: FastAPI, seconds: int) -> list:
+    """
+    Get last metrics(for page reload)
+    :param app: FastAPI
+    :param seconds: Period in seconds
+    :return:
+    """
+    items = []
+    pool = app.state.db_pool
+    async with pool.acquire() as conn:
+        to = datetime.now()
+        at = to - timedelta(seconds=seconds)
+        records = await conn.fetch(f"select * from metrics where created_at between '{at}' and '{to}'")
+        for record in records:
+            items.append({
+                'ts': int(record['created_at'].timestamp() * 1000),
+                'name': record['sensor_id'],
+                'value': record['value'],
+            })
+
+    return items

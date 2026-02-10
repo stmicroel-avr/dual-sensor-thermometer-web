@@ -4,6 +4,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.websockets import WebSocket, WebSocketDisconnect
 
 from bluetooth import *
+from db import fetch_last_metrics
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -15,10 +16,25 @@ async def index(request: Request):
     :param request: Request
     :return: TemplateResponse
     """
-    return templates.TemplateResponse(
-        "index.html",
-        {"request": request},
-    )
+    return templates.TemplateResponse("index.html", {"request": request})
+
+@router.websocket("/ws")
+async def websocket_endpoint(ws: WebSocket):
+    """
+    Websocket endpoint
+    :param ws: WebSocket
+    :return:
+    """
+    await ws.accept()
+    ws.app.state.logger.info("Websocket client connected")
+    ws.app.state.ws_clients.add(ws)
+
+    try:
+        while True:
+            await ws.receive_text()
+    except WebSocketDisconnect:
+        ws.app.state.logger.info("Websocket client disconnected")
+        ws.app.state.ws_clients.remove(ws)
 
 @router.get("/scan", response_class=JSONResponse)
 async def scan(request: Request):
@@ -55,6 +71,11 @@ async def connect(request: Request):
 
 @router.get("/current_bluetooth_connection", response_class=JSONResponse)
 async def get_current_ble_connect(request: Request):
+    """
+    Get current bluetooth connection
+    :param request: Request
+    :return:
+    """
     if request.app.state.ble_task and not request.app.state.ble_task.done():
         return {
             "success": True,
@@ -66,20 +87,17 @@ async def get_current_ble_connect(request: Request):
         }
     return {"success": False}
 
-@router.websocket("/ws")
-async def websocket_endpoint(ws: WebSocket):
-    """
-    Websocket endpoint
-    :param ws: WebSocket
-    :return:
-    """
-    await ws.accept()
-    ws.app.state.logger.info("Websocket client connected")
-    ws.app.state.ws_clients.add(ws)
-    
+@router.get("/get_last_metrics", response_class=JSONResponse)
+async def get_last_metrics(request: Request):
+    seconds = request.query_params.get("seconds")
+    if not seconds or (type(seconds) != int and not seconds.isdigit()):
+        return {"success": False}
+
     try:
-        while True:
-            await ws.receive_text()
-    except WebSocketDisconnect:
-        ws.app.state.logger.info("Websocket client disconnected")
-        ws.app.state.ws_clients.remove(ws)
+        items = await fetch_last_metrics(request.app, int(seconds))
+        return {
+            "success": True,
+            "data": items
+        }
+    except:
+        return {"success": False}

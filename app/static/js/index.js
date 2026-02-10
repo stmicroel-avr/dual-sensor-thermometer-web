@@ -27,7 +27,7 @@ const myChart = new Chart(chartEl, {
       x: {
         type: 'realtime',
         realtime: {
-          duration: 300_000,
+          duration: 600_000,
           delay: 100,
         },
       },
@@ -229,6 +229,39 @@ const bluetoothFunc = {
       console.error(err);
     }
   },
+
+  async getLastMetrics(seconds) {
+    try {
+      const params = new URLSearchParams({ seconds });
+      const json = await fetchJson(`/get_last_metrics?${params}`);
+
+      if (json?.success) {
+        json.data.forEach((item) => {
+          let index = -1;
+          if (item.name === 'Temp1') {
+            index = 0;
+          }
+          if (item.name === 'Temp2') {
+            index = 1;
+          }
+          if (index !== -1) {
+             myChart
+                 .data
+                 .datasets[index]
+                 .data
+                 .push({
+                   x: item.ts,
+                   y: item.value
+                 });
+          }
+        });
+      } else {
+        console.error(json);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
 };
 
 // ===== WebSocket -> chart =====
@@ -272,6 +305,7 @@ ws.addEventListener('error', (e) => {
 });
 
 bluetoothFunc.reconnectLastDevice();
+bluetoothFunc.getLastMetrics(600);
 
 // If you call scan from HTML onclick, keep it accessible
 // window.bluetoothFunc = bluetoothFunc;
