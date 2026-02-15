@@ -58,11 +58,34 @@ async def fetch_last_metrics(app: FastAPI, seconds: int) -> list:
     :return:
     """
     items = []
-    pool = app.state.db_pool
-    async with pool.acquire() as conn:
+    async with app.state.db_pool.acquire() as conn:
         to = datetime.now()
         at = to - timedelta(seconds=seconds)
         records = await conn.fetch(f"select * from metrics where created_at between '{at}' and '{to}'")
+        for record in records:
+            items.append({
+                'ts': int(record['created_at'].timestamp() * 1000),
+                'name': record['sensor_id'],
+                'value': record['value'],
+            })
+
+    return items
+
+async def fetch_metrics_by_period(app: FastAPI, start: datetime, end: datetime|None) -> list:
+    """
+    Get metrics by period(for history charts)
+    :param app: FastAPI
+    :param start: Period start
+    :param end: Period end
+    :return:
+    """
+    items = []
+    async with app.state.db_pool.acquire() as conn:
+        query = f"select * from minute_metrics where created_at >= '{start}'"
+        if end is not None:
+            query += f" and created_at < '{end}'"
+
+        records = await conn.fetch(query)
         for record in records:
             items.append({
                 'ts': int(record['created_at'].timestamp() * 1000),

@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.websockets import WebSocket, WebSocketDisconnect
 
 from bluetooth import *
-from db import fetch_last_metrics
+from db import fetch_last_metrics, fetch_metrics_by_period
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -101,6 +101,34 @@ async def get_last_metrics(request: Request):
         return {
             "success": True,
             "data": items
+        }
+    except:
+        return {"success": False}
+
+@router.get("/get_period_metrics", response_class=JSONResponse)
+async def get_last_metrics(request: Request):
+    start = request.query_params.get("from")
+    end = request.query_params.get("to")
+
+    if not start:
+        return {"success": False, "error": "Start date is required"}
+
+    try:
+        start = datetime.strptime(start, "%Y-%m-%d %H:%M:%S")
+    except:
+        return {"success": False, "error": "Start date is not valid"}
+
+    if not end:
+        try:
+            end = datetime.strptime(end, "%Y-%m-%d %H:%M:%S")
+        except:
+            return {"success": False, "error": "End date is not valid"}
+
+    try:
+        items = await fetch_metrics_by_period(request.app, start, end)
+        return {
+            "success": True,
+            "data": items,
         }
     except:
         return {"success": False}
