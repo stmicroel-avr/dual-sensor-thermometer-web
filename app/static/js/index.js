@@ -233,6 +233,12 @@ const bluetoothFunc = {
     devicesListEl.append(linkEl);
   },
 
+  refreshLastUpdate: (dateStr) => {
+    const lastUpdateEl = document.getElementById('rt-last-update');
+    if (!lastUpdateEl) return;
+    lastUpdateEl.innerHTML = dateStr;
+  },
+
   async reconnectLastDevice() {
     try {
       const json = await fetchJson('/current_bluetooth_connection');
@@ -240,6 +246,7 @@ const bluetoothFunc = {
       if (json?.success && json?.data) {
         this.clearDevicesList();
         this.addDevice(json.data, true);
+        this.refreshLastUpdate(json.data?.last_update);
 
         if (window.Toastify) {
           Toastify({
@@ -327,14 +334,37 @@ ws.addEventListener('message', (e) => {
   if (temps.t2 !== null) rtChart.data.datasets[1].data.push({ x: ts, y: temps.t2 });
 
   rtChart.update('quiet');
+  bluetoothFunc.refreshLastUpdate(printNowDateStr(ts));
 });
 
 ws.addEventListener('error', (e) => {
   console.error('WebSocket error', e);
 });
 
+document.addEventListener("DOMContentLoaded", () => {
+  if (!window.flatpickr) {
+    return;
+  }
+
+  const input = document.getElementById("history-range");
+  if (!input) {
+    return;
+  }
+
+  flatpickr(input, {
+      mode: "range",
+      enableTime: true,
+      time_24hr: true,
+      dateFormat: "Y-m-d H:i:S",
+      altInput: true,
+      altFormat: "d.m.Y H:i",
+      defaultDate: [
+          new Date().setHours(0, 0, 0, 0),
+          new Date().setHours(23, 59, 59, 999),
+      ],
+      disableMobile: true
+  });
+});
+
 bluetoothFunc.reconnectLastDevice();
 bluetoothFunc.getLastMetrics(600);
-
-// If you call scan from HTML onclick, keep it accessible
-// window.bluetoothFunc = bluetoothFunc;

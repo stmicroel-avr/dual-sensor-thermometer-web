@@ -1,113 +1,128 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>Dual Thermometer Web</title>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+	<title>Dual Thermometer Web</title>
 
-    <!-- Styles (load CSS early to avoid FOUC) -->
-    <link rel="stylesheet" href="static/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="static/css/bootstrap-icons.min.css"/>
-    <link rel="stylesheet" href="static/css/bootstrap-icons-animations.min.css"/>
-    <link rel="stylesheet" href="static/css/toastify.min.css"/>
-    <link rel="stylesheet" href="static/css/base.css"/>
+	<!-- Styles -->
+	<link rel="stylesheet" href="static/css/bootstrap.min.css"/>
+	<link rel="stylesheet" href="static/css/bootstrap-icons.min.css"/>
+	<link rel="stylesheet" href="static/css/bootstrap-icons-animations.min.css"/>
+	<link rel="stylesheet" href="static/css/toastify.min.css"/>
+	<link rel="stylesheet" href="static/css/base.css"/>
 
-    <!-- Vendor scripts (prefer defer to preserve order & avoid blocking render) -->
-    <script src="static/js/chart.min.js" defer></script>
-    <script src="static/js/luxon.min.js" defer></script>
-    <script src="static/js/chartjs-adapter-luxon.min.js" defer></script>
-    <script src="static/js/chartjs-plugin-streaming.min.js" defer></script>
-    <script src="static/js/bootstrap.min.js" defer></script>
-    <script src="static/js/toastify.min.js" defer></script>
+	<!-- Flatpickr -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"/>
 
-    <!-- App script -->
-    <script src="static/js/index.js?ver=1.14" defer></script>
+	<style>
+		.chart-box{
+			height: calc(100vh - 500px);
+			min-height: 240px;
+			position: relative;
+			overflow: hidden;
+		}
+		.chart-box canvas{
+			display: block;
+		}
+	</style>
+
+	<!-- Vendor scripts -->
+	<script src="static/js/chart.min.js" defer></script>
+	<script src="static/js/luxon.min.js" defer></script>
+	<script src="static/js/chartjs-adapter-luxon.min.js" defer></script>
+	<script src="static/js/chartjs-plugin-streaming.min.js" defer></script>
+	<script src="static/js/bootstrap.min.js" defer></script>
+	<script src="static/js/toastify.min.js" defer></script>
+
+	<!-- Flatpickr -->
+	<script src="https://cdn.jsdelivr.net/npm/flatpickr" defer></script>
+
+	<!-- App -->
+	<script src="static/js/util.js" defer></script>
+	<script src="static/js/index.js?ver=1.14" defer></script>
 </head>
 
 <body>
-<!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="#">
-            Dual Thermometer Web
-        </a>
-
-        <!-- Bootstrap 5 uses data-bs-* attributes -->
-        <button
-                class="navbar-toggler"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#navbarColor02"
-                aria-controls="navbarColor02"
-                aria-expanded="false"
-                aria-label="Toggle navigation"
-        >
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarColor02">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="#">Graphs</a>
-                </li>
-            </ul>
-        </div>
-    </div>
+	<div class="container-fluid">
+		<a class="navbar-brand" href="#">Dual Thermometer Web</a>
+	</div>
 </nav>
 
-<!-- App body -->
 <main class="container-fluid px-2 py-1">
-    <div class="row g-2">
-        <!-- Chart -->
-        <div class="col-12 col-lg-8">
-            <h3>
-                <small>
-                    Realtime graph
-                    <small class="float-right">last update: </small>
-                </small>
-            </h3>
-            <div style="height: calc(100vh - 500px);">
-                <canvas id="rtChart"></canvas>
-            </div>
+	<div class="row g-2">
+		<div class="col-12 col-lg-8">
 
-           <div class="btn-group-sm mt-3 mb-2" role="group" aria-label="date group">
-              <button type="button" class="btn btn-outline-secondary active">Day</button>
-              <button type="button" class="btn btn-outline-secondary">Week</button>
-              <button type="button" class="btn btn-outline-secondary">Month</button>
-            </div>
+			<!-- Realtime header (FIXED FOR REAL) -->
+			<div class="d-flex justify-content-between align-items-center w-100 mb-1">
+				<h3 class="mb-0 flex-grow-1 me-2">
+					<small>Realtime graph</small>
+				</h3>
 
-            <h3><small>History graph</small></h3>
-            <div style="height: calc(100vh - 500px);">
-                <canvas id="statChart"></canvas>
-            </div>
-        </div>
+				<small class="text-secondary text-nowrap">
+					last update:
+					<span id="rt-last-update">—</span>
+				</small>
+			</div>
 
-        <!-- Devices -->
-        <div class="col-12 col-lg-4">
-            <div class="d-flex flex-column" style="height: calc(100vh - 70px);">
-                <div class="d-flex align-items-center justify-content-between w-100">
-                    <h5 class="mb-0 d-flex align-items-center gap-2">
-                        <i class="bi bi-bluetooth" aria-hidden="true"></i>
-                        <span id="devices-title">Devices</span>
-                    </h5>
+			<div class="chart-box">
+				<canvas id="rtChart"></canvas>
+			</div>
 
-                    <button
-                            id="scan-btn"
-                            type="button"
-                            class="btn btn-sm btn-outline-primary"
-                            onclick="bluetoothFunc.scan()"
-                    >
-                        <i id="scan-loader" class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
-                        <span class="ms-1">Scan</span>
-                    </button>
-                </div>
+			<div class="btn-group-sm mt-3 mb-2" role="group" aria-label="date group">
+				<button type="button" class="btn btn-outline-secondary active">Day</button>
+				<button type="button" class="btn btn-outline-secondary">Week</button>
+				<button type="button" class="btn btn-outline-secondary">Month</button>
+			</div>
 
-                <div class="list-group mt-2 flex-grow-1 overflow-auto" id="devices-list">
-                    <h6 class="text-secondary mb-0">No devices...</h6>
-                </div>
-            </div>
-        </div>
-    </div>
+			<!-- History header (75/25) -->
+			<div class="row align-items-center g-2 mb-1">
+				<div class="col-12 col-md-9">
+					<h3 class="mb-0"><small>History graph</small></h3>
+				</div>
+				<div class="col-12 col-md-3 text-md-end">
+					<input
+						type="text"
+						id="history-range"
+						class="form-control form-control-sm w-100"
+						autocomplete="off"
+					/>
+				</div>
+			</div>
+
+			<div class="chart-box">
+				<canvas id="statChart"></canvas>
+			</div>
+		</div>
+
+		<!-- Devices -->
+		<div class="col-12 col-lg-4">
+			<div class="d-flex flex-column" style="height: calc(100vh - 70px);">
+				<div class="d-flex align-items-center justify-content-between w-100">
+					<h5 class="mb-0 d-flex align-items-center gap-2">
+						<i class="bi bi-bluetooth" aria-hidden="true"></i>
+						<span id="devices-title">Devices</span>
+					</h5>
+
+					<button
+						id="scan-btn"
+						type="button"
+						class="btn btn-sm btn-outline-primary"
+						onclick="bluetoothFunc.scan()"
+					>
+						<i id="scan-loader" class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+						<span class="ms-1">Scan</span>
+					</button>
+				</div>
+
+				<div class="list-group mt-2 flex-grow-1 overflow-auto" id="devices-list">
+					<h6 class="text-secondary mb-0">No devices...</h6>
+				</div>
+			</div>
+		</div>
+
+	</div>
 </main>
 </body>
 </html>

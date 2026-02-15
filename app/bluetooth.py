@@ -12,6 +12,7 @@ class Device:
     name: str|None
     address: str|None
     time: str|None
+    lastupdate: str|None
 
 async def ble_scan(app: FastAPI):
     """
@@ -40,6 +41,7 @@ async def ble_connect_worker(app: FastAPI, address: str):
     """
     def on_rx(_, data: bytearray):
         app.state.queue.put_nowait(data.decode(errors="ignore"))
+        app.state.ble_device.lastupdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     client = BleakClient(address)
     await client.connect()

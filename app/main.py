@@ -32,7 +32,8 @@ async def lifespan(app: FastAPI):
     app.state.ble_device = Device(
         name=None,
         address=None,
-        time=None
+        time=None,
+        lastupdate=None,
     )
     app.state.ble_task = None
     app.state.ble_client = None

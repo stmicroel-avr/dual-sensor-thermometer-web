@@ -1,3 +1,4 @@
+from datetime import datetime
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse,JSONResponse
 from fastapi.templating import Jinja2Templates
@@ -65,6 +66,7 @@ async def connect(request: Request):
         address=data['addr'],
         name=data['name'],
         time=data['time'],
+        lastupdate=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     )
 
     return {"success": True}
@@ -83,6 +85,7 @@ async def get_current_ble_connect(request: Request):
                 "name": request.app.state.ble_device.name,
                 "addr": request.app.state.ble_device.address,
                 "time": request.app.state.ble_device.time,
+                "last_update": request.app.state.ble_device.lastupdate,
             },
         }
     return {"success": False}
