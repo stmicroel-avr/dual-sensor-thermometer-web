@@ -1,5 +1,6 @@
 // ===== Chart =====
-const chartEl = document.getElementById('myChart');
+const rtChartEl = document.getElementById('rtChart');
+const statChartEl = document.getElementById('statChart');
 const makeTempDataset = (label, borderColor, backgroundColor) => ({
   label,
   data: [],
@@ -10,7 +11,7 @@ const makeTempDataset = (label, borderColor, backgroundColor) => ({
   backgroundColor,
 });
 
-const myChart = new Chart(chartEl, {
+const rtChart = new Chart(rtChartEl, {
   type: 'line',
   data: {
     datasets: [
@@ -26,6 +27,34 @@ const myChart = new Chart(chartEl, {
     scales: {
       x: {
         type: 'realtime',
+        realtime: {
+          duration: 600_000,
+          delay: 100,
+        },
+      },
+      y: {
+        title: { display: true, text: '°C' },
+      },
+    },
+  },
+});
+
+const statChart = new Chart(statChartEl, {
+  type: 'line',
+  data: {
+    datasets: [
+      makeTempDataset('OnBoard', '#36A2EB', 'rgba(54,162,235,0.15)'),
+      makeTempDataset('OnWire', '#FF6384', 'rgba(255,99,132,0.15)'),
+    ],
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: false,
+    parsing: false,
+    scales: {
+      x: {
+        type: 'time',
         realtime: {
           duration: 600_000,
           delay: 100,
@@ -245,7 +274,7 @@ const bluetoothFunc = {
             index = 1;
           }
           if (index !== -1) {
-             myChart
+             rtChart
                  .data
                  .datasets[index]
                  .data
@@ -294,10 +323,10 @@ ws.addEventListener('message', (e) => {
   // Optional debug
   // console.log({ ts, t1: temps.t1, t2: temps.t2 });
 
-  if (temps.t1 !== null) myChart.data.datasets[0].data.push({ x: ts, y: temps.t1 });
-  if (temps.t2 !== null) myChart.data.datasets[1].data.push({ x: ts, y: temps.t2 });
+  if (temps.t1 !== null) rtChart.data.datasets[0].data.push({ x: ts, y: temps.t1 });
+  if (temps.t2 !== null) rtChart.data.datasets[1].data.push({ x: ts, y: temps.t2 });
 
-  myChart.update('quiet');
+  rtChart.update('quiet');
 });
 
 ws.addEventListener('error', (e) => {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>Dual Thermometer Web 1.0</title>
+    <title>Dual Thermometer Web</title>
 
     <!-- Styles (load CSS early to avoid FOUC) -->
     <link rel="stylesheet" href="static/css/bootstrap.min.css"/>
@@ -28,7 +28,9 @@
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">Dual Thermometer Web 1.0</a>
+        <a class="navbar-brand" href="#">
+            Dual Thermometer Web
+        </a>
 
         <!-- Bootstrap 5 uses data-bs-* attributes -->
         <button
@@ -58,8 +60,25 @@
     <div class="row g-2">
         <!-- Chart -->
         <div class="col-12 col-lg-8">
+            <h3>
+                <small>
+                    Realtime graph
+                    <small class="float-right">last update: </small>
+                </small>
+            </h3>
             <div style="height: calc(100vh - 500px);">
-                <canvas id="myChart"></canvas>
+                <canvas id="rtChart"></canvas>
+            </div>
+
+           <div class="btn-group-sm mt-3 mb-2" role="group" aria-label="date group">
+              <button type="button" class="btn btn-outline-secondary active">Day</button>
+              <button type="button" class="btn btn-outline-secondary">Week</button>
+              <button type="button" class="btn btn-outline-secondary">Month</button>
+            </div>
+
+            <h3><small>History graph</small></h3>
+            <div style="height: calc(100vh - 500px);">
+                <canvas id="statChart"></canvas>
             </div>
         </div>
 
