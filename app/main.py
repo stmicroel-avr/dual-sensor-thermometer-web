@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import asyncpg
+from dataclasses import dataclass
 from fastapi import FastAPI
 from fastapi.requests import Request
 from contextlib import asynccontextmanager
@@ -10,6 +11,11 @@ from db import create_db
 from routes import router
 from listener import queue_handler
 from bluetooth import Device
+
+@dataclass
+class AppState:
+    queue_last_event_hour: int|None = None
+    queue_last_event_minute: int|None = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -38,6 +44,7 @@ async def lifespan(app: FastAPI):
     app.state.ble_task = None
     app.state.ble_client = None
     app.state.ws_clients = set()
+    app.state.app = AppState()
     app.state.queue = asyncio.Queue(maxsize=5000)
     app.state.logger = logging.getLogger("uvicorn.error")
     app.state.queue_task = asyncio.create_task(queue_handler(app))
